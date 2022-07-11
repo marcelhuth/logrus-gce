@@ -51,9 +51,10 @@ var (
 )
 
 type sourceLocation struct {
-	File         string `json:"file"`
-	Line         int    `json:"line"`
-	FunctionName string `json:"functionName"`
+	File string `json:"file"`
+	Line int    `json:"line"`
+	// FunctionName is "function" in JSON: https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry?hl=de#logentrysourcelocation
+	FunctionName string `json:"function"`
 }
 
 func getSkipLevel(level logrus.Level) (int, error) {
@@ -108,7 +109,7 @@ func (f *GCEFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	data["time"] = entry.Time.Format(time.RFC3339Nano)
 	data["severity"] = levelsLogrusToGCE[entry.Level]
-	data["logMessage"] = entry.Message
+	data["textPayload"] = entry.Message
 
 	if f.withSourceInfo {
 		skip, err := getSkipLevel(entry.Level)
@@ -118,9 +119,10 @@ func (f *GCEFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		if pc, file, line, ok := runtime.Caller(skip); ok {
 			f := runtime.FuncForPC(pc)
 			data["sourceLocation"] = map[string]interface{}{
-				"file":         file,
-				"line":         line,
-				"functionName": f.Name(),
+				"file": file,
+				"line": line,
+				// FunctionName is "function" in JSON: https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry?hl=de#logentrysourcelocation
+				"function": f.Name(),
 			}
 		}
 	}
