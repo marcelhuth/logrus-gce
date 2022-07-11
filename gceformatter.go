@@ -109,7 +109,7 @@ func (f *GCEFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	data["time"] = entry.Time.Format(time.RFC3339Nano)
 	data["severity"] = levelsLogrusToGCE[entry.Level]
-	data["textPayload"] = entry.Message
+	data["message"] = entry.Message
 
 	if f.withSourceInfo {
 		skip, err := getSkipLevel(entry.Level)
@@ -118,7 +118,7 @@ func (f *GCEFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		}
 		if pc, file, line, ok := runtime.Caller(skip); ok {
 			f := runtime.FuncForPC(pc)
-			data["sourceLocation"] = map[string]interface{}{
+			data["logging.googleapis.com/sourceLocation"] = map[string]interface{}{
 				"file": file,
 				"line": line,
 				// FunctionName is "function" in JSON: https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry?hl=de#logentrysourcelocation
