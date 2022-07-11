@@ -76,7 +76,7 @@ func getSkipLevel(level logrus.Level) (int, error) {
 	runtime.Callers(3, stackSkipsCallers)
 	for i, pc := range stackSkipsCallers {
 		f := runtime.FuncForPC(pc)
-		if strings.HasPrefix(f.Name(), "github.com/sirupsen/logrus") == true {
+		if strings.HasPrefix(f.Name(), "github.com/sirupsen/logrus") {
 			continue
 		}
 		stackSkips[level] = i + 1
@@ -99,7 +99,7 @@ func (f *GCEFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		switch v := v.(type) {
 		case error:
 			// Otherwise errors are ignored by `encoding/json`
-			// https://github.com/Sirupsen/logrus/issues/137
+			// https://github.com/sirupsen/logrus/issues/137
 			data[k] = v.Error()
 		default:
 			data[k] = v
@@ -110,7 +110,7 @@ func (f *GCEFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	data["severity"] = levelsLogrusToGCE[entry.Level]
 	data["logMessage"] = entry.Message
 
-	if f.withSourceInfo == true {
+	if f.withSourceInfo {
 		skip, err := getSkipLevel(entry.Level)
 		if err != nil {
 			return nil, err
@@ -127,7 +127,7 @@ func (f *GCEFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	serialized, err := json.Marshal(data)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to marshal fields to JSON, %v", err)
+		return nil, fmt.Errorf("failed to marshal fields to JSON, %v", err)
 	}
 	return append(serialized, '\n'), nil
 }
